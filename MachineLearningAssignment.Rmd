@@ -1,0 +1,111 @@
+---
+title: "Machine Learning Assignment"
+author: "David Tomashek"
+date: "August 22, 2015"
+output: html_document
+---
+
+### Introduction
+In this exercise we will be analyzing data from activity tracking devices that were collected from subjects doing dumbbell biceps curls.  Each collection instance was classified as either correct (Class A) or incorrect in one of four different ways (Classes B through E).  This purpose of this exercise is to create a prediction algorithm to classify biceps curl data as one of the five qualitative classifications of the fitness activity.  After showing the methodology for creating the algorithm and calculating the predicted out-of-sample error, the prediction model will be applied to a new set of 20 instances of biceps curl data.
+
+### Preprocessing
+Before conducting any exploratory analysis, the dataset will be split into two subsets, one for training and one for testing the prediction model.  The training set will contain about 60% of the records and the test set will have the remainder. **NOTE: All preprocessing code will be shown in Appendix A.**
+
+After eliminating the first seven columns that do not contain motion data, there remain 152 columns of independent variables.  The next step will be to eliminate any columns with near-zero variance.  This reduces the number of columns down to 100.
+
+There seems to be a large number of columns containing many NA values.  Counting the number of NA values in each column reveals that there are 48 columns with 11,518 NA values out of  11,776 values.  That would not seem to be enough data to conduct a meaningful analysis, so those columns will be eliminated.  This gets us to a dataset of 52 independent variables and the outcome variable.
+
+```{r, echo=FALSE, results="hide",message=FALSE}
+
+pml <- read.csv("pml-training.csv")
+
+library(caret)
+
+set.seed(1789)
+inTrain <- createDataPartition(y=pml$classe,p=.6, list=F)
+pml.train <- pml[inTrain,c(8:160)]
+pml.test <- pml[-inTrain,]
+
+nsv <- nearZeroVar(pml.train,saveMetrics=TRUE)
+gzv <- which(nsv$nzv==F)
+pml.train2 <- pml.train[,gzv]
+
+s <- vector()
+
+for (i in 1:101 ) {
+  s[i] <- summary(pml.train2[,i])[7]
+}
+
+ntmna <- which(is.na(s))
+pml.train3 <- pml.train2[,ntmna]
+```
+
+### Methodology and Cross Validation
+We will be using the random forest method to create the prediction model. I chose this method because of its high accuracy which will be useful for the required blind submission of twenty predictions.
+```{r, message=FALSE,warning=FALSE}
+# this code takes about 30 minutes to run
+library(randomForest)
+modelFit <- train(classe ~ .,method="rf",preProcess="pca",data=pml.train3)
+```
+There is a certain amount of cross validation built into the random forest method, but we will also run the rfcv function to show cross-validated prediction performance.  This is also useful to predict the out-of-sample error rate.
+```{r}
+# this code takes about 15 minutes to run
+cv <- rfcv(trainx=pml.train3[,1:52],trainy=pml.train3[,53])
+cv$error.cv
+```
+As you can see, using all 52 predictors (which we did in creating our model) returns a predicted error rate of less than 1%.
+
+As a final validation, we will run the prediction model against our test subset. We get an overall accuracy rate of 97.5%.
+```{r}
+pml.predict <- predict(modelFit,pml.test)
+cm <- confusionMatrix(pml.test$classe,pml.predict)
+cm$table
+cm$overall[1]
+```
+
+# Applying the Model to the Test Set
+When applying the prediction model to the test set, we get the following predictions for each of the twenty dumbbell curl instances:
+```{r}
+pml.submit <- read.csv("pml-testing.csv")
+pml.predict.s <- predict(modelFit,pml.submit)
+pml.predict.s
+```
+After submitting each of these predictions through the tedious submission process provided by the geniuses at Johns Hopkins, we find that all predictions are correct.
+
+### Citations
+The Weight Lifting Exercises dataset used in this exercise was originally used in the following paper:
+
+Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. **Qualitative Activity Recognition of Weight Lifting Exercises.** Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013
+Read more: http://groupware.les.inf.puc-rio.br/har#ixzz3jIUIwwOD
+Appendix A - Preprocessing code
+
+### Appendix A - Preprocessing code
+
+The following code was used to split the training set into training and testing subsets, as well as eliminating columns that were not useful to the analysis.
+
+```{r}
+
+pml <- read.csv("pml-training.csv")
+
+set.seed(1789)
+inTrain <- createDataPartition(y=pml$classe,p=.6, list=F)
+pml.train <- pml[inTrain,c(8:160)]
+pml.test <- pml[-inTrain,]
+
+nsv <- nearZeroVar(pml.train,saveMetrics=TRUE)
+gzv <- which(nsv$nzv==F)
+pml.train2 <- pml.train[,gzv]
+
+s <- vector()
+
+for (i in 1:101 ) {
+  s[i] <- summary(pml.train2[,i])[7]
+}
+
+ntmna <- which(is.na(s))
+pml.train3 <- pml.train2[,ntmna]
+
+```
+
+
+
