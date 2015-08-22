@@ -106,8 +106,8 @@ cm$table</code></pre>
 <pre><code>##  Accuracy 
 ## 0.9746368</code></pre>
 </div>
-<div id="applying-the-model-to-the-test-set" class="section level1">
-<h1>Applying the Model to the Test Set</h1>
+<div id="applying-the-model-to-the-test-set" class="section level3">
+<h3>Applying the Model to the Test Set</h3>
 <p>When applying the prediction model to the test set, we get the following predictions for each of the twenty dumbbell curl instances:</p>
 <pre class="r"><code>pml.submit &lt;- read.csv(&quot;pml-testing.csv&quot;)
 pml.predict.s &lt;- predict(modelFit,pml.submit)
@@ -115,10 +115,11 @@ pml.predict.s</code></pre>
 <pre><code>##  [1] B A B A A E D B A A B C B A E E A B B B
 ## Levels: A B C D E</code></pre>
 <p>After submitting each of these predictions through the tedious submission process provided by the geniuses at Johns Hopkins, we find that all predictions are correct.</p>
+</div>
 <div id="citations" class="section level3">
 <h3>Citations</h3>
 <p>The Weight Lifting Exercises dataset used in this exercise was originally used in the following paper:</p>
-<p>Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. <strong>Qualitative Activity Recognition of Weight Lifting Exercises.</strong> Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human ’13) . Stuttgart, Germany: ACM SIGCHI, 2013 Read more: <a href="http://groupware.les.inf.puc-rio.br/har#ixzz3jIUIwwOD" class="uri">http://groupware.les.inf.puc-rio.br/har#ixzz3jIUIwwOD</a> Appendix A - Preprocessing code</p>
+<p>Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. <strong>Qualitative Activity Recognition of Weight Lifting Exercises.</strong> Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human ’13) . Stuttgart, Germany: ACM SIGCHI, 2013 Read more: <a href="http://groupware.les.inf.puc-rio.br/har#ixzz3jIUIwwOD" class="uri">http://groupware.les.inf.puc-rio.br/har#ixzz3jIUIwwOD</a></p>
 </div>
 <div id="appendix-a---preprocessing-code" class="section level3">
 <h3>Appendix A - Preprocessing code</h3>
@@ -142,7 +143,6 @@ for (i in 1:101 ) {
 
 ntmna &lt;- which(is.na(s))
 pml.train3 &lt;- pml.train2[,ntmna]</code></pre>
-</div>
 </div>
 
 
